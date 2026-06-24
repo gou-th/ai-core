@@ -25,4 +25,4 @@ A bit-accurate NumPy reference for the full MNIST forward pass - INT8 quantizati
 pip install numpy tensorflow
 python3 golden_model/golden_model.py
 ```
-![Golden model running MNIST at 98.6%](golden_model/golden_model_run.png)
+![Golden model running MNIST at 98.6%](golden_model/golden_model.png)
