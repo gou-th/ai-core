@@ -2,7 +2,7 @@
  
 A small INT8 systolic-array accelerator on the Basys 3, driven by a custom CPU and instruction set. The goal is to run neural network inference end-to-end on real hardware. A scalar CPU sequences a 4×4 weight-stationary systolic array through a small custom ISA.
  
-![Status](https://img.shields.io/badge/Status-Week%203%2F8-orange) ![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Icarus%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
+![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Icarus%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
  
 > ISA, assembler, golden model, PE, and 3-stage scalar CPU are built and cocotb-verified. Systolic array integration is next.
  
