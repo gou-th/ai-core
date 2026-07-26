@@ -27,10 +27,10 @@ always @(posedge clk) begin
         psum_out <= psum_in + (act_in*weight_reg); // Update partial sum
     end
 end
-
-initial begin
-    $dumpfile("pe.vcd");
-    $dumpvars(0, pe);
-end
-
+`ifdef COCOTB_SIM
+    initial begin
+        $dumpfile("pe.vcd");
+        $dumpvars(0, pe);
+    end
+`endif
 endmodule
