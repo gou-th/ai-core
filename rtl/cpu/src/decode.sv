@@ -26,6 +26,7 @@ always_comb begin
     is_branch = 0;
     is_halt = 0;
     is_m_op = 0;
+    is_act = 0;
     m_op_type = 2'b00;
     case (opcode)
         6'h00: // LI
