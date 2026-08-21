@@ -1,6 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1787160498" />
-    <testcase name="test_systolic_array" classname="systolic_array_test" file="/home/gou/ai_core/rtl/systolic_array/sim/systolic_array_test.py" lineno="6" time="0.0047969818115234375" sim_time_ns="130.0" ratio_time="27100.37375745527" />
-  </testsuite>
-</testsuites>
