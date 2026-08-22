@@ -99,7 +99,7 @@ Reverses the array's output stagger. `psum_out[j]` exits the array at a differen
 cd rtl/deskew_buffer/sim && make
 ```
 
-### MXU Integration - [`rtl/mxu_integration/](rtl/mxu_integration/)
+### MXU Integration - [`rtl/mxu_integration/`](rtl/mxu_integration/)
 
 Wires skew_buffer -> systolic_array -> deskew_buffer into one datapath. Raw activations in, aligned INT32 psums out. 
 
