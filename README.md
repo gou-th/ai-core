@@ -59,7 +59,7 @@ python3 golden_model/golden_model.py
  
 Each block lives in its own folder, split into `src/` (design) and `sim/` (cocotb testbench + Makefile).
  
-### PE - `rtl/pe/`
+### PE - [`rtl/pe/`](rtl/pe/)
  
 Single weight-stationary processing element. INT8×INT8 → INT32 accumulate, 1-cycle registered output. Verified against pre-computed MAC values across signed weight/activation combinations.
  
@@ -67,7 +67,7 @@ Single weight-stationary processing element. INT8×INT8 → INT32 accumulate, 1-
 cd rtl/pe/sim && make
 ```
 
-### CPU - `rtl/cpu/`
+### CPU - [`rtl/cpu/`](rtl/cpu/)
  
 3-stage scalar CPU running the ISA above. Verified with a pre-assembled integration test covering LI, ADDI, LOOP and STATUS, cross-checked against a GTKWave trace and cocotb.
  
@@ -75,7 +75,7 @@ cd rtl/pe/sim && make
 cd rtl/cpu/sim && make
 ````
 
-### Systolic Array - `rtl/systolic_array/`
+### Systolic Array - [`rtl/systolic_array/`](rtl/systolic_array/)
 
 4×4 mesh of the verified PE, weight-stationary. Weights broadcast to all 16 PEs in a single `load_w` cycle rather than shifting row-by-row. This is a deliberate deviation from the classic TPU-style array.
 
@@ -83,7 +83,7 @@ cd rtl/cpu/sim && make
 cd rtl/systolic_array/sim && make
 ```
 
-### Skew Buffer - `rtl/skew_buffer/`
+### Skew Buffer - [`rtl/skew_buffer/`](rtl/skew_buffer/)
 
 Staggers the 4 incoming activations by 0/1/2/3 cycles i.e. row i delayed i cycles so they enter the array diagonally, as the systolic dataflow requires. Verified standalone against expected per-row delay.
 
@@ -91,7 +91,7 @@ Staggers the 4 incoming activations by 0/1/2/3 cycles i.e. row i delayed i cycle
 cd rtl/skew_buffer/sim && make
 ```
 
-### Deskew Buffer - `rtl/deskew_buffer/`
+### Deskew Buffer - [`rtl/deskew_buffer/`](rtl/deskew_buffer)
 
 Reverses the array's output stagger. `psum_out[j]` exits the array at a different cycle per column; this buffer delays each column (3/2/1/0 cycles) so all 4 land aligned on the same cycle. Verified standalone.
 
@@ -99,7 +99,7 @@ Reverses the array's output stagger. `psum_out[j]` exits the array at a differen
 cd rtl/deskew_buffer/sim && make
 ```
 
-### MXU Integration - `rtl/mxu_integration/`
+### MXU Integration - [`rtl/mxu_integration/](rtl/mxu_integration/)
 
 Wires skew_buffer -> systolic_array -> deskew_buffer into one datapath. Raw activations in, aligned INT32 psums out. 
 
