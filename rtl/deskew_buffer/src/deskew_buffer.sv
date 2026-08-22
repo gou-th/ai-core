@@ -1,7 +1,7 @@
 module deskew_buffer (
     input logic clk, rst_n,
-    input logic [31:0] psum_in [3:0],
-    output logic [31:0] psum_out [3:0]
+    input logic signed [31:0] psum_in [3:0],
+    output logic signed [31:0] psum_out [3:0]
 );
 
 logic signed [31:0] shift_reg [3:0][2:0]; 
