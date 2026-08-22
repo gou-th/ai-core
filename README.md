@@ -2,9 +2,15 @@
  
 A small INT8 systolic-array accelerator on the Basys 3, driven by a custom CPU and instruction set. The goal is to run neural network inference end-to-end on real hardware. A scalar CPU sequences a 4×4 weight-stationary systolic array through a small custom ISA.
  
-![Status](https://img.shields.io/badge/Status-Week%203%2F8-orange) ![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Icarus%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
+<<<<<<< HEAD
+![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Verilator%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
  
-> ISA, assembler, golden model, PE, and 3-stage scalar CPU are built and cocotb-verified. Systolic array integration is next.
+> ISA, assembler, golden model, PE, 3-stage scalar CPU, 4x4 systolic array, skew/deskew buffers and mxu integration  are built and cocotb-verified. 
+=======
+![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Icarus%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
+ 
+> ISA, assembler, golden model, PE, 3-stage scalar CPU, 4×4 systolic array and skew/deskew buffers are built and cocotb-verified.
+>>>>>>> ca82a9885ecdf6d379c4b0c23be48c73f54f4a09
  
 ## Spec
  
@@ -50,24 +56,55 @@ Bit-accurate NumPy reference for the full MNIST forward pass - INT8 quantization
 pip install numpy tensorflow
 python3 golden_model/golden_model.py
 ```
-![Golden model running MNIST at 98.6%](golden_model/golden_model_run.png)
  
 ## [RTL](rtl/)
  
 Each block lives in its own folder, split into `src/` (design) and `sim/` (cocotb testbench + Makefile).
  
-### PE — `rtl/pe/`
+### PE - `rtl/pe/`
  
 Single weight-stationary processing element. INT8×INT8 → INT32 accumulate, 1-cycle registered output. Verified against pre-computed MAC values across signed weight/activation combinations.
  
 ```
 cd rtl/pe/sim && make
 ```
- 
-### CPU — `rtl/cpu/`
+
+### CPU - `rtl/cpu/`
  
 3-stage scalar CPU running the ISA above. Verified with a pre-assembled integration test covering LI, ADDI, LOOP and STATUS, cross-checked against a GTKWave trace and cocotb.
  
 ```
 cd rtl/cpu/sim && make
+````
+
+### Systolic Array - `rtl/systolic_array/`
+
+4×4 mesh of the verified PE, weight-stationary. Weights broadcast to all 16 PEs in a single `load_w` cycle rather than shifting row-by-row. This is a deliberate deviation from the classic TPU-style array.
+
+```
+cd rtl/systolic_array/sim && make
+```
+
+### Skew Buffer - `rtl/skew_buffer/`
+
+Staggers the 4 incoming activations by 0/1/2/3 cycles i.e. row i delayed i cycles so they enter the array diagonally, as the systolic dataflow requires. Verified standalone against expected per-row delay.
+
+```
+cd rtl/skew_buffer/sim && make
+```
+
+### Deskew Buffer - `rtl/deskew_buffer/`
+
+Reverses the array's output stagger. `psum_out[j]` exits the array at a different cycle per column; this buffer delays each column (3/2/1/0 cycles) so all 4 land aligned on the same cycle. Verified standalone.
+
+```
+cd rtl/deskew_buffer/sim && make
+```
+
+### MXU Integration - `rtl/mxu_integration/`
+
+Wires skew_buffer -> systolic_array -> deskew_buffer into one datapath. Raw activations in, aligned INT32 psums out. 
+
+```
+cd rtl/mxu_integration/sim && make
 ```
