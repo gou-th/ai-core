@@ -1,19 +1,6 @@
 module cpu (
     input logic clk,
     input logic rst_n,
-
-    //weight memory interface
-    output logic [15:0] weight_addr,
-    input logic [127:0] weight_data,
-
-    //activation memory interface
-    output logic [15:0] act_addr,
-    input logic signed [7:0] act_data [3:0],
-
-    //result interface
-    output logic store_en,
-    output logic [15:0] result_addr,
-    output logic signed [31:0] result_data [3:0]
 );
 
 //control signals
@@ -29,6 +16,14 @@ logic [1:0] m_op_type, matrix_cmd;
 //datapath
 logic signed [7:0] act_reg [3:0];
 logic signed [31:0] psum_out [3:0];
+logic [15:0] weight_addr;
+logic [127:0] weight_data;
+logic [15:0] act_addr;
+logic [31:0] act_data_read;
+logic signed [7:0] act_data [3:0];
+logic store_en;
+logic [15:0] result_addr;
+logic signed [31:0] result_data [3:0];
 
 assign wrt_addr_mux = is_branch ? rs1_addr : rd_addr;
 
@@ -111,6 +106,12 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if (load_a)
         for (int i = 0; i < 4; i++) act_reg[i] <= act_data[i];
 end
+always_comb begin
+        act_data[0] = act_data_read[7:0];
+        act_data[1] = act_data_read[15:8];
+        act_data[2] = act_data_read[23:16];
+        act_data[3] = act_data_read[31:24];
+    end
 
 mxu_integration u_mxu (
     .clk(clk), .rst_n(rst_n),
@@ -126,6 +127,31 @@ accum_bank u_accum (
     .acc_en(acc_en), .acc_clear(acc_clear),
     .acc_out(result_data)
 );
+
+weight_mem u_weight_mem (
+        .clk(clk),
+        .addr(weight_addr[8:0]),
+        .data_out(weight_data)
+    );
+
+act_mem u_act_mem (
+        .clk(clk),
+        .write_en(1'b0),           
+        .write_addr(9'd0),
+        .write_data(32'd0),
+        .read_addr(act_addr[8:0]),
+        .data_out(act_data_read)
+    );
+
+result_mem u_result_mem (
+        .clk(clk),
+        .write_en(store_en),
+        .write_addr(result_addr[8:0]),
+        .write_data({result_data[3], result_data[2], result_data[1], result_data[0]}),
+        .read_addr(9'd0),          
+        .data_out()
+    );
+
 
 initial begin
     $dumpfile("cpu_new.vcd");
