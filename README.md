@@ -2,13 +2,7 @@
  
 A small INT8 systolic-array accelerator on the Basys 3, driven by a custom CPU and instruction set. The goal is to run neural network inference end-to-end on real hardware. A scalar CPU sequences a 4×4 weight-stationary systolic array through a small custom ISA.
  
-![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Verilator%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
- 
-> ISA, assembler, golden model, PE, 3-stage scalar CPU, 4x4 systolic array, skew/deskew buffers, mxu integration and accumulator bank are built and cocotb-verified. 
-
-![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Icarus%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey)
- 
-> ISA, assembler, golden model, PE, 3-stage scalar CPU, 4×4 systolic array and skew/deskew buffers are built and cocotb-verified.
+![Language](https://img.shields.io/badge/Language-SystemVerilog-blue) ![Sim](https://img.shields.io/badge/Sim-Verilator%20%2B%20cocotb-9cf) ![Target](https://img.shields.io/badge/Target-Basys%203%20(Artix--7)-lightgrey) 
  
 ## Spec
  
@@ -69,7 +63,7 @@ cd rtl/pe/sim && make
 
 ### CPU - [`rtl/cpu/`](rtl/cpu/)
  
-3-stage scalar CPU running the ISA above. Verified with a pre-assembled integration test covering LI, ADDI, LOOP and STATUS, cross-checked against a GTKWave trace and cocotb.
+3-stage scalar CPU running the ISA above. Verified with a pre-assembled integration test cross-checked against a GTKWave trace and cocotb.
  
 ```
 cd rtl/cpu/sim && make
@@ -114,3 +108,20 @@ cd rtl/mxu_integration/sim && make
 ```
 cd rtl/accum_bank/sim && make
 ```
+
+### MXU Controller - [`rtl/mxu_controller/`](rtl/mxu_controller/)
+
+6 state FSM (IDLE -> LOAD_W -> LOAD_A -> RUN -> STORE -> DONE) managing weight and activation preloads, systolic array execution and accumulator bank integration. Acts as the main handshaking mechanism with CPU.
+
+```
+cd rtl/mxu_controller/sim && make
+```
+
+### CPU <-> MXU Integration - [`rtl/cpu/sim/test_cpu_mxu.py`](rtl/cpu/sim/test_cpu_mxu.py)
+
+End to end CPU and MXU handshake verification. CPU executes a new assembler script [`cpu_test.asm`](rtl/cpu/sim/cpu_test.asm) and verified using reference run.
+
+```
+cd rtl/cpu/sim && make
+```
+
