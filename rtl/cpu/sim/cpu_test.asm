@@ -1,6 +1,6 @@
-LI R1, 3    
-LI R2, 0      
-loop: ADDI  R2, R2, 5  
-LOOP  R1, loop    
-STATUS R3         
+LI R0, 0
+M_LD_W R0
+M_LD_A R0
+M_MUL R0, R0
+M_ST R0, 0x100
 HALT

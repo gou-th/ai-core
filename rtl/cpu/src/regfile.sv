@@ -11,7 +11,7 @@ module regfile (
 logic [31:0] regs [31:0];
 integer i;
 
-always @(posedge clk) begin
+always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin 
         for (i = 0; i< 32; i = i+1)
             regs[i] <= 0;

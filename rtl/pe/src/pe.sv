@@ -14,7 +14,7 @@ module pe #(
 
 reg signed [DATA_WIDTH-1:0] weight_reg;
 
-always @(posedge clk) begin
+always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         act_out <= 0;
         psum_out <= 0;
