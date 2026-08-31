@@ -42,11 +42,20 @@ python3 assembler/assembler.py assembler/test.asm assembler/test.mem
  
 ## [Golden Model](golden_model/)
  
-Bit-accurate NumPy reference for the full MNIST forward pass - INT8 quantization, integer matmul, INT32 accumulation, ReLU, argmax. Runs at 98.6% accuracy. Will serve as the verification oracle once the systolic array produces MNIST-scale outputs to check against; PE and CPU tests so far are verified against pre-computed expected values.
- 
+Two part quantization pipeline. `train_quantize.py` (Windows, TensorFlow) trains the MNIST model, quantizes weights to INT8 and exports the [weight files and scales](golden_model/train_quantize.png). `golden.py`(WSL, NumPy) is the reference file - integer forward pass matching hardware computation exactly. [Verified 20/20 on test images](golden_model/golden_run.png).
+
 ```
 pip install numpy tensorflow
-python3 golden_model/golden_model.py
+```
+
+```
+# Windows: train and quantize (run once)
+python3 golden_model/train_quantize.py
+```
+
+```
+# WSL: run the reference model 
+python3 golden_model/golden.py
 ```
  
 ## [RTL](rtl/)
