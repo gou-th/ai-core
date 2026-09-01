@@ -22,11 +22,11 @@ operand_count = {'LI':2,      #Rd, Imm
                  'LOOP':2,    #Rs1, Imm/Label
                  'M_LD_W':1,  #Rs1
                  'M_MUL':2,   #Rd, Rs1
-                 'ACT':2,     #Rs1, Immm
+                 'ACT':1,     #Rs1
                  'STATUS':1,  #Rd
                  'HALT':0,
                  'M_LD_A':1,  #Rs1
-                 'M_ST':2,}   #Rs1, Imm
+                 'M_ST':1,}   #Rs1
 
 def converter(inst):              
     if ';' in inst:               #remove commetns 
@@ -77,7 +77,6 @@ def assemble(token, line, labels):
             rs1 = registers[token[2]]
         elif op_mnemonic == 'ACT':
             rs1 = registers[token[1]]
-            imm = int(token[2],0) & 0xFFFF  #16-bit immediate
         elif op_mnemonic == 'STATUS':
             rd = registers[token[1]]
         elif op_mnemonic == 'HALT':
@@ -86,7 +85,6 @@ def assemble(token, line, labels):
             rs1 = registers[token[1]]
         elif op_mnemonic == 'M_ST':
             rs1 = registers[token[1]]
-            imm = int(token[2],0) & 0xFFFF  #16-bit immediate
     except KeyError as e:
         print(f"Line {line}: Invalid register '{e.args[0]}'")
         return None

@@ -26,11 +26,11 @@ A small INT8 systolic-array accelerator on the Basys 3, driven by a custom CPU a
 | 0x02 | `LOOP` | Rs1, Imm | Rs1 ← Rs1 − 1; branch if Rs1 ≠ 0 |
 | 0x03 | `M_LD_W` | Rs1 | load weight tile into array |
 | 0x04 | `M_MUL` | Rd, Rs1 | run systolic matmul |
-| 0x05 | `ACT` | Rs1, Imm | ReLU activation |
+| 0x05 | `ACT` | Rs1| ReLU activation |
 | 0x06 | `STATUS` | Rd | Rd ← matrix unit status |
 | 0x07 | `HALT` | — | stop |
 | 0x08 | `M_LD_A` | Rs1 | load activation tile |
-| 0x09 | `M_ST` | Rs1, Imm | store accumulator result |
+| 0x09 | `M_ST` | Rs1 | store accumulator result |
  
 ## [Assembler](assembler/)
  

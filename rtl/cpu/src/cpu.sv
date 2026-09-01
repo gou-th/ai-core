@@ -97,7 +97,7 @@ mxu_controller u_mxu_controller (
 
 assign weight_addr = rs1_data_out[15:0];   // M_LD_W Rs1
 assign act_addr = rs1_data_out[15:0];   // M_LD_A Rs1
-assign result_addr = imm;  // M_ST  Rs1, Imm
+assign result_addr = rs1_data_out[15:0];  // M_ST  Rs1
 
 // activation holding register
 always_ff @(posedge clk or negedge rst_n) begin
@@ -142,7 +142,7 @@ requant #(.M(955), .S(24)) u_requant (
 act_mem u_act_mem (
         .clk(clk),
         .write_en(1'b0),           
-        .write_addr(imm[8:0]),
+        .write_addr(rs1_data_out[8:0]),
         .write_data({act_requant_out[3], act_requant_out[2], act_requant_out[1], act_requant_out[0]}),
         .read_addr(act_addr[8:0]),
         .data_out(act_data_read)
