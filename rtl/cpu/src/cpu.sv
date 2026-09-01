@@ -130,7 +130,7 @@ accum_bank u_accum (
 
 weight_mem u_weight_mem (
         .clk(clk),
-        .addr(weight_addr[8:0]),
+        .addr(weight_addr[12:0]),
         .data_out(weight_data)
     );
 
