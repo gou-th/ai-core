@@ -1,6 +1,6 @@
 module cpu (
     input logic clk,
-    input logic rst_n,
+    input logic rst_n
 );
 
 //control signals
@@ -24,6 +24,7 @@ logic signed [7:0] act_data [3:0];
 logic store_en;
 logic [15:0] result_addr;
 logic signed [31:0] result_data [3:0];
+logic signed [7:0] act_requant_out [3:0];
 
 assign wrt_addr_mux = is_branch ? rs1_addr : rd_addr;
 
@@ -94,7 +95,6 @@ mxu_controller u_mxu_controller (
     .acc_clear(acc_clear)
 );
 
-
 assign weight_addr = rs1_data_out[15:0];   // M_LD_W Rs1
 assign act_addr = rs1_data_out[15:0];   // M_LD_A Rs1
 assign result_addr = imm;  // M_ST  Rs1, Imm
@@ -134,11 +134,16 @@ weight_mem u_weight_mem (
         .data_out(weight_data)
     );
 
+requant #(.M(955), .S(24)) u_requant (
+    .acc_in(result_data),
+    .act_out(act_requant_out)
+);
+
 act_mem u_act_mem (
         .clk(clk),
         .write_en(1'b0),           
-        .write_addr(9'd0),
-        .write_data(32'd0),
+        .write_addr(imm[8:0]),
+        .write_data({act_requant_out[3], act_requant_out[2], act_requant_out[1], act_requant_out[0]}),
         .read_addr(act_addr[8:0]),
         .data_out(act_data_read)
     );

@@ -7,6 +7,10 @@ VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../../mxu_integration/src/mxu_integration.sv \
                    $(PWD)/../../accum_bank/src/accum_bank.sv \
                    $(PWD)/../../mxu_controller/src/mxu_controller.sv \
+                   $(PWD)/../../requant/src/requant.sv \
+                   $(PWD)/../src/weight_mem.sv \
+                   $(PWD)/../src/act_mem.sv \
+                   $(PWD)/../src/result_mem.sv \
                    $(PWD)/../src/fetch.sv \
                    $(PWD)/../src/decode.sv \
                    $(PWD)/../src/execute.sv \
