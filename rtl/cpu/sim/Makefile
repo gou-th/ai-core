@@ -1,5 +1,6 @@
 SIM ?= verilator
 TOPLEVEL_LANG = verilog
+VERILATOR_TRACE = 1
 VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../../systolic_array/src/systolic_array.sv \
                    $(PWD)/../../skew_buffer/src/skew_buffer.sv \
@@ -17,6 +18,6 @@ VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../src/regfile.sv \
                    $(PWD)/../src/cpu.sv
 TOPLEVEL = cpu
-MODULE = test_cpu_mxu
+MODULE = test_mnist
 VERILATOR_TRACE = 1
 include $(shell cocotb-config --makefiles)/Makefile.sim

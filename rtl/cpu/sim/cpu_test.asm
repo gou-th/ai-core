@@ -1,6 +1,0 @@
-LI R0, 0
-M_LD_W R0
-M_LD_A R0
-M_MUL R0, R0
-M_ST R0, 0x100
-HALT
