@@ -135,14 +135,29 @@ weight_mem u_weight_mem (
     );
 
 requant #(.M(955), .S(24)) u_requant (
+    .clk(clk),
+    .rst_n(rst_n),
     .acc_in(result_data),
     .act_out(act_requant_out)
 );
 
+logic is_act_delay;
+logic [8:0] act_write_addr_delay;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        is_act_delay <= 1'b0;
+        act_write_addr_delay <= 9'd0;
+    end else begin
+        is_act_delay <= is_act;
+        act_write_addr_delay <= rs1_data_out[8:0];
+    end
+end
+
 act_mem u_act_mem (
         .clk(clk),
-        .write_en(is_act),           
-        .write_addr(rs1_data_out[8:0]),
+        .write_en(is_act_delay),           
+        .write_addr(act_write_addr_delay),
         .write_data({act_requant_out[3], act_requant_out[2], act_requant_out[1], act_requant_out[0]}),
         .read_addr(act_addr[8:0]),
         .data_out(act_data_read)
