@@ -1,6 +1,8 @@
 module cpu (
     input logic clk,
-    input logic rst_n
+    input logic rst_n,
+    output logic store_en,
+    output logic signed [31:0] result_data [3:0]
 );
 
 //control signals
@@ -21,9 +23,7 @@ logic [127:0] weight_data;
 logic [15:0] act_addr;
 logic [31:0] act_data_read;
 logic signed [7:0] act_data [3:0];
-logic store_en;
 logic [15:0] result_addr;
-logic signed [31:0] result_data [3:0];
 logic signed [7:0] act_requant_out [3:0];
 
 assign wrt_addr_mux = is_branch ? rs1_addr : rd_addr;

@@ -7,7 +7,7 @@ module act_mem (
 );
 
 (* ram_style = "block" *) logic [31:0] mem [0:256];
-initial $readmemh("images.mem", mem);
+// initial $readmemh("images.mem", mem);
 
 always_ff @(posedge clk) begin
     if (write_en) begin

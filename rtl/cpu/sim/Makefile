@@ -9,6 +9,8 @@ VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../../accum_bank/src/accum_bank.sv \
                    $(PWD)/../../mxu_controller/src/mxu_controller.sv \
                    $(PWD)/../../requant/src/requant.sv \
+                   $(PWD)/../../argmax/src/argmax.sv \
+                   $(PWD)/../../seven_seg/src/seven_seg.sv \
                    $(PWD)/../src/weight_mem.sv \
                    $(PWD)/../src/act_mem.sv \
                    $(PWD)/../src/result_mem.sv \
@@ -16,8 +18,8 @@ VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../src/decode.sv \
                    $(PWD)/../src/execute.sv \
                    $(PWD)/../src/regfile.sv \
-                   $(PWD)/../src/cpu.sv
-TOPLEVEL = cpu
+                   $(PWD)/../src/cpu.sv \
+                   $(PWD)/../../top/src/ai_core_top.sv
+TOPLEVEL = ai_core_top
 MODULE = test_mnist
-VERILATOR_TRACE = 1
 include $(shell cocotb-config --makefiles)/Makefile.sim

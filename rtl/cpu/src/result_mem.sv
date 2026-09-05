@@ -7,7 +7,7 @@ module result_mem (
  );
  
  (* ram_style = "block" *) logic [127:0] mem [0:256];
- initial $readmemh("results.mem", mem);
+// initial $readmemh("results.mem", mem);
  
  always_ff @(posedge clk) begin
      if (write_en) begin
