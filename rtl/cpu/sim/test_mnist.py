@@ -133,6 +133,8 @@ async def test_mnist(dut):
         await RisingEdge(dut.clk)
         await FallingEdge(dut.clk)
 
+        await RisingEdge(dut.clk)
+        await FallingEdge(dut.clk)
         # INT32 accumulators from layer 1
         got_acc = np.array(stores[:layer1_stores]).flatten()
         check("layer-1 accumulators", got_acc, expected_acc, idx)
@@ -155,7 +157,7 @@ async def test_mnist(dut):
         label = int(labels[idx])
         if hw_digit == label:
             correct_predictions += 1
-            
+
         print(f"image {idx}: predicted {hw_digit}, "
               f"label {label} ({cycles} cycles)", flush=True)
 
