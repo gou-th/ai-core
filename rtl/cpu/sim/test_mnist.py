@@ -132,7 +132,10 @@ async def test_mnist(dut):
         # argmax's registered output for the final store lags by one cycle
         await RisingEdge(dut.clk)
         await FallingEdge(dut.clk)
-
+        await RisingEdge(dut.clk)
+        await FallingEdge(dut.clk)
+        await RisingEdge(dut.clk)
+        await FallingEdge(dut.clk)
         await RisingEdge(dut.clk)
         await FallingEdge(dut.clk)
         # INT32 accumulators from layer 1
