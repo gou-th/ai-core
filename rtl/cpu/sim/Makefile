@@ -11,6 +11,7 @@ VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../../requant/src/requant.sv \
                    $(PWD)/../../argmax/src/argmax.sv \
                    $(PWD)/../../seven_seg/src/seven_seg.sv \
+                   $(PWD)/../../uart_rx/src/uart_rx.sv \
                    $(PWD)/../src/weight_mem.sv \
                    $(PWD)/../src/act_mem.sv \
                    $(PWD)/../src/result_mem.sv \
@@ -21,5 +22,6 @@ VERILOG_SOURCES = $(PWD)/../../pe/src/pe.sv \
                    $(PWD)/../src/cpu.sv \
                    $(PWD)/../../top/src/ai_core_top.sv
 TOPLEVEL = ai_core_top
-MODULE = test_mnist
+MODULE = test_uart_loop
+COMPILE_ARGS += -GCLKS_PER_BIT=8
 include $(shell cocotb-config --makefiles)/Makefile.sim

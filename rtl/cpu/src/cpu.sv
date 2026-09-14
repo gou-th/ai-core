@@ -1,6 +1,9 @@
 module cpu (
     input logic clk,
     input logic rst_n,
+    input logic ext_wrt_en,
+    input logic [7:0] ext_wrt_addr,
+    input logic [31:0] ext_wrt_data,
     output logic store_en,
     output logic signed [31:0] result_data [3:0]
 );
@@ -154,14 +157,24 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
+logic act_wrt_en;
+logic [8:0]  act_wrt_addr;
+logic [31:0] act_wrt_data;
+
+assign act_wrt_en = ext_wrt_en ? 1'b1 : is_act_delay;
+assign act_wrt_addr = ext_wrt_en ? {1'b0, ext_wrt_addr} : act_write_addr_delay;
+assign act_wrt_data = ext_wrt_en ? ext_wrt_data
+                          : {act_requant_out[3], act_requant_out[2],
+                             act_requant_out[1], act_requant_out[0]};
+
 act_mem u_act_mem (
-        .clk(clk),
-        .write_en(is_act_delay),           
-        .write_addr(act_write_addr_delay),
-        .write_data({act_requant_out[3], act_requant_out[2], act_requant_out[1], act_requant_out[0]}),
-        .read_addr(act_addr[8:0]),
-        .data_out(act_data_read)
-    );
+    .clk(clk),
+    .write_en(act_wrt_en),
+    .write_addr(act_wrt_addr),
+    .write_data(act_wrt_data),
+    .read_addr(act_addr[8:0]),
+    .data_out(act_data_read)
+);
 
 result_mem u_result_mem (
         .clk(clk),
