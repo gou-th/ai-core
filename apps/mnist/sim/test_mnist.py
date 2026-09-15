@@ -114,7 +114,7 @@ async def test_mnist(dut):
     cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
 
     golden = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                          '..', '..', '..', 'golden_model')
+                          '..', 'golden_model')
     w1 = np.load(os.path.join(golden, 'w1.npy')).astype(np.int32)
     w2 = np.load(os.path.join(golden, 'w2.npy')).astype(np.int32)
     images = np.load(os.path.join(golden, 'test_images.npy'))
