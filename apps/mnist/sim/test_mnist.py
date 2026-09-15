@@ -73,10 +73,12 @@ def read_layer1_output(dut):
 
 async def reset_cpu(dut):
     "reset for 3 cycles, clears PC and registers"
-    dut.rst_n.value = 0
+    dut.rst_n_btn.value = 0
+    await RisingEdge(dut.clk)
+    dut.rst_n_btn.value = 1
     for _ in range(3):
         await RisingEdge(dut.clk)
-    dut.rst_n.value = 1
+    dut.rst_n_btn.value = 0
     await FallingEdge(dut.clk)
 
 
@@ -127,31 +129,24 @@ async def test_mnist(dut):
 
         write_img_to_mem(dut, images[idx])
         await reset_cpu(dut)
+        dut.running.value = 1   # test bypasses UART, so force running manually
+
         stores, cycles = await run_program(dut)
 
-        # argmax's registered output for the final store lags by one cycle
-        await RisingEdge(dut.clk)
-        await FallingEdge(dut.clk)
-        await RisingEdge(dut.clk)
-        await FallingEdge(dut.clk)
-        await RisingEdge(dut.clk)
-        await FallingEdge(dut.clk)
-        await RisingEdge(dut.clk)
-        await FallingEdge(dut.clk)
-        # INT32 accumulators from layer 1
+        for _ in range(10):
+            await RisingEdge(dut.clk)
+            await FallingEdge(dut.clk)
+
         got_acc = np.array(stores[:layer1_stores]).flatten()
         check("layer-1 accumulators", got_acc, expected_acc, idx)
 
-        # ACT output in act_mem
         got_act = read_layer1_output(dut)
         check("ACT requant", got_act, expected_act, idx)
 
-        # layer-2, remove the 2 zero-padding columns.
         got_output = np.array(stores[layer1_stores:]).flatten()[:10]
         check("layer-2 output", got_output, expected_output, idx)
 
-        # prediction, read straight from the argmax hardware
-        hw_digit = int(dut.u_argmax.digit.value)
+        hw_digit = int(dut.display_digit.value)
         assert hw_digit == ref_pred, (
             f"image {idx}: argmax hardware said {hw_digit}, "
             f"reference argmax says {ref_pred}"

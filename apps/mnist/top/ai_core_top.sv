@@ -1,10 +1,13 @@
 module ai_core_top (
     input  logic clk,
-    input  logic rst_n,
+    input  logic rst_n_btn,
     input  logic rx,
     output logic [6:0] seg,
     output logic [3:0] an
 );
+
+    logic rst_n;
+    assign rst_n = ~rst_n_btn;
 
     logic store_en;
     logic signed [31:0] result_data [3:0];
@@ -63,14 +66,20 @@ module ai_core_top (
         end
     end
 
-   
+    logic [1:0] drain_cnt;
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
+        if (!rst_n) begin
             running <= 1'b0;
-        else if (img_done)
+            drain_cnt <= 2'd0;
+        end else if (img_done) begin
             running <= 1'b1;
-        else if (running && store_count == 6'd35)
-            running <= 1'b0;
+            drain_cnt <= 2'd0;
+        end else if (running && store_count == 6'd35) begin
+            if (drain_cnt == 2'd2) 
+                running <= 1'b0;
+            else 
+                drain_cnt <= drain_cnt + 2'b1;
+        end
     end
 
     cpu u_cpu (
