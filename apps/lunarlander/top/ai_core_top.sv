@@ -1,7 +1,8 @@
 module ai_core_top (
-    input  logic clk,
-    input  logic rst_n_btn,
-    input  logic rx,
+    input logic clk,
+    input logic rst_n_btn,
+    input logic rx,
+    output logic tx,
     output logic [6:0] seg,
     output logic [3:0] an
 );
@@ -174,6 +175,30 @@ module ai_core_top (
         else if (argmax_done)
             display_action <= action;
     end
+
+        // fire uart_tx once per inference, right when the action is ready
+    logic tx_start;
+    logic tx_busy;
+    logic argmax_done_prev;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            argmax_done_prev <= 1'b0;
+            tx_start <= 1'b0;
+        end else begin
+            argmax_done_prev <= argmax_done;
+            tx_start <= argmax_done && !argmax_done_prev;
+        end
+    end
+
+    uart_tx #(.clk_per_bit(16'd868)) u_uart_tx (
+        .clk(clk),
+        .rst_n(rst_n),
+        .data({6'd0, action}),
+        .tx_start(tx_start),
+        .tx(tx),
+        .tx_busy(tx_busy)
+    );
 
     seven_seg u_seven_seg (
         .clk(clk),

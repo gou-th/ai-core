@@ -21,7 +21,8 @@ VERILOG_SOURCES = $(PWD)/../../../rtl/pe/pe.sv \
                    $(PWD)/../argmax/argmax.sv \
                    $(PWD)/../seven_seg/seven_seg.sv \
                    $(PWD)/../top/ai_core_top.sv \
-                   $(PWD)/../../../rtl/uart/uart_rx.sv
+                   $(PWD)/../../../rtl/uart/uart_rx.sv \
+                   $(PWD)/../../../rtl/uart/uart_tx.sv
 
 TOPLEVEL = ai_core_top
 MODULE = test_lunarlander
