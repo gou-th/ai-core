@@ -1,10 +1,9 @@
-# build_program.py
 import sys
 from layer_gen import generate_network
 from assembler import converter, assemble
 
-def build(layer_dims, out_mem_path, weight_base=0, act_base=0, result_base=0, save_asm=True):
-    asm_text = generate_network(layer_dims, weight_base, act_base, result_base)
+def build(layer_pairs, out_mem_path, weight_base=0, act_base=0, result_base=0, save_asm=True):
+    asm_text = generate_network(layer_pairs, weight_base, act_base, result_base)
 
     if save_asm:
         asm_path = out_mem_path.rsplit('.', 1)[0] + ".asm"
@@ -41,7 +40,10 @@ def build(layer_dims, out_mem_path, weight_base=0, act_base=0, result_base=0, sa
     print(f"Wrote {out_mem_path}, {len(instructions)} instructions")
 
 if __name__ == "__main__":
-    dims_str = input("Layer dims, comma separated (e.g. 784,128,10): ")
-    layer_dims = [int(x.strip()) for x in dims_str.split(',')]
+    pairs_str = input("Layer (in,out) pairs, semicolon separated (e.g. 784,128;128,10): ")
+    layer_pairs = []
+    for pair in pairs_str.split(';'):
+        in_dim, out_dim = pair.split(',')
+        layer_pairs.append((int(in_dim.strip()), int(out_dim.strip())))
     out_path = input("Output .mem path [like program.mem]: ").strip() or "program.mem"
-    build(layer_dims, out_path)nah 
+    build(layer_pairs, out_path)

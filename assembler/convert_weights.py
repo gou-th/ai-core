@@ -21,11 +21,10 @@ def pad_weights(w, in_dim, out_dim):
     padded[:in_dim, :out_dim] = w
     return padded
 
-def generate_weights_mem(layer_dims, weight_arrays, out_path):
-    assert len(weight_arrays) == len(layer_dims) - 1
+def generate_weights_mem(layer_pairs, weight_arrays, out_path):
+    assert len(weight_arrays) == len(layer_pairs)
     with open(out_path, 'w') as f:
-        for i in range(len(layer_dims) - 1):
-            in_dim, out_dim = layer_dims[i], layer_dims[i + 1]
+        for i, (in_dim, out_dim) in enumerate(layer_pairs):
             w = weight_arrays[i]
             assert w.shape == (in_dim, out_dim), \
                 f"layer {i}: expected ({in_dim},{out_dim}), got {w.shape}"
@@ -35,11 +34,14 @@ def generate_weights_mem(layer_dims, weight_arrays, out_path):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 convert_weights.py 784,128,10 w1.npy w2.npy -o weights.mem")
+        print("Usage: python3 convert_weights.py 9,128;129,128;129,4 w1.npy w2.npy w3.npy -o weights.mem")
         sys.exit(1)
 
-    layer_dims = [int(x) for x in sys.argv[1].split(',')]
-    n_layers = len(layer_dims) - 1
+    layer_pairs = []
+    for pair in sys.argv[1].split(';'):
+        in_dim, out_dim = pair.split(',')
+        layer_pairs.append((int(in_dim), int(out_dim)))
+    n_layers = len(layer_pairs)
 
     npy_paths = sys.argv[2:2 + n_layers]
     if len(npy_paths) != n_layers:
@@ -51,4 +53,4 @@ if __name__ == "__main__":
         out_path = sys.argv[sys.argv.index("-o") + 1]
 
     weight_arrays = [np.load(p) for p in npy_paths]
-    generate_weights_mem(layer_dims, weight_arrays, out_path)
+    generate_weights_mem(layer_pairs, weight_arrays, out_path)

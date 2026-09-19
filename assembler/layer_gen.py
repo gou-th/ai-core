@@ -38,16 +38,14 @@ LOOP R1, {OUTER}
     return asm
 
 
-def generate_network(layer_dims, weight_base=0, act_base=0, result_base=0):
+def generate_network(layer_pairs, weight_base=0, act_base=0, result_base=0):
     prog = ""
     weight_addr = weight_base
     act_read = act_base
     res_addr = result_base
 
-    for i in range(len(layer_dims) - 1):
-        in_dim = layer_dims[i]
-        out_dim = layer_dims[i + 1]
-        is_last = (i == len(layer_dims) - 2)
+    for i, (in_dim, out_dim) in enumerate(layer_pairs):
+        is_last = (i == len(layer_pairs) - 1)
         act_write = act_read + ceil4(in_dim)
 
         prog += generate_dense_layer(

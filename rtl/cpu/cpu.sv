@@ -1,4 +1,7 @@
-module cpu (
+module cpu #(
+    parameter int REQUANT_M = 955,
+    parameter int REQUANT_S = 24
+)(
     input logic clk,
     input logic rst_n,
     input logic ext_wrt_en,
@@ -137,7 +140,7 @@ weight_mem u_weight_mem (
         .data_out(weight_data)
     );
 
-requant #(.M(955), .S(24)) u_requant (
+requant #(.M(REQUANT_M), .S(REQUANT_S)) u_requant (
     .clk(clk),
     .rst_n(rst_n),
     .acc_in(result_data),
