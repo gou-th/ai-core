@@ -7,3 +7,9 @@ results.xml
 results.xml
 sim_build/
 __pycache__/
+
+# build/sim artifacts
+**/sim_build/
+**/*.vcd
+**/__pycache__/
+**/results.xml
