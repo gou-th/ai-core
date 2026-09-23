@@ -15,9 +15,7 @@ Two workloads run on the same core -
 
 ## Demo
 
-[![AI Core demo](docs/img/demo-thumb.png)](https://youtu.be/VIDEO_ID_TBD)
-
-*(click to play, hosted on YouTube)*
+https://github.com/user-attachments/assets/ae688596-a088-453b-9f3e-4d6d89a33b37
 
 ---
 
@@ -199,11 +197,13 @@ cd apps/lunarlander/sim && make    # LunarLander
 ### 3. Build the bitstream (Windows -> Vivado)
 
 ```powershell
-vivado -mode batch -source apps/mnist/build.tcl
-vivado -mode batch -source apps/lunarlander/build.tcl
+cd path/to/apps/mnist    # use the path on your device to apps/mnist/
+source build.tcl
+cd path/to/apps/mnist
+source build.tcl         # use the path on your device to apps/lunarlander
 ```
 
-Runs fine from PowerShell or cmd as long as `vivado` is on your PATH. If it isn't, use the Vivado Tcl Shell
+Run these commands in the Vivado Tcl
 
 ### 4. Run it on hardware (Windows)
 
