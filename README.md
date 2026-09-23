@@ -3,7 +3,6 @@
 ![FPGA](https://img.shields.io/badge/FPGA-Basys_3_XC7A35T-orange)
 ![HDL](https://img.shields.io/badge/HDL-SystemVerilog-blue)
 ![tooling](https://img.shields.io/badge/sim-cocotb_Verilator-brightgreen)
-![clock](https://img.shields.io/badge/clock-100_MHz-informational)
 
 A heterogeneous AI accelerator built from scratch on a Basys 3 (Artix-7 XC7A35T). A small custom CPU drives a 4x4 weight-stationary systolic array and the whole thing is programmed through a 10-instruction ISA with its own assembler. Everything runs in INT8 end to end on the board and it's checked bit-for-bit against a NumPy reference model.
 
