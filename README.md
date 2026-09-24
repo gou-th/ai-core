@@ -4,12 +4,9 @@
 ![HDL](https://img.shields.io/badge/HDL-SystemVerilog-blue)
 ![tooling](https://img.shields.io/badge/sim-cocotb_Verilator-brightgreen)
 
-A heterogeneous AI accelerator built from scratch on a Basys 3 (Artix-7 XC7A35T). A small custom CPU drives a 4x4 weight-stationary systolic array and the whole thing is programmed through a 10-instruction ISA with its own assembler. Everything runs in INT8 end to end on the board and it's checked bit-for-bit against a NumPy reference model.
+A custom AI accelerator built from scratch on a Basys 3 (Artix-7 XC7A35T) FPGA. A small custom CPU drives a 4x4 weight-stationary systolic array and the whole thing is programmed through a 10-instruction ISA with its own assembler.
 
-Two workloads run on the same core - 
-
-- MNIST digit classification, which was the proof of concept
-- LunarLander-v3, a PPO policy was trained, quantized to INT8 and playing the game live on the board
+It's running my own trained model: a PPO policy for LunarLander-v3 trained on my machine, quantized to INT8 and playing the game live on the board. Every action comes from the FPGA real time and checked against a NumPy reference model before it was deployed on hardware.
 
 ---
 
@@ -26,8 +23,8 @@ A full custom inference stack:
 1. ISA + assembler - A 32-bit instruction set for driving the matrix unit plus a two-pass Python assembler that gives `.mem` files
 2. Scalar CPU - A 3-stage fetch/decode/execute sequencer with 8 registers. It isn't a general-purpose core, it's really just a controller for the matrix unit
 3. 4x4 systolic array - Weight-stationary INT8 PEs mapped onto DSP slices with INT32 accumulation and then fixed-point requant + ReLU
-4. Toolchain - Shared Python script that turns layer shapes into assembly and quantized weights into BRAM init files
-5. Two apps - MNIST and LunarLander, each a per-app wrapper around the shared core
+4. Toolchain - Python codegen that turns layer shapes into assembly and quantized weights into BRAM init files
+5. The policy - a -trained LunarLander, quantized to INT8 and running entirely on the board
 
 ---
 
@@ -35,7 +32,7 @@ A full custom inference stack:
 
 ### Instantiation hierarchy
 
-`ai_core_top` is the per-app wrapper. Everything in `rtl/` (teal) is shared and identical across both apps. The per-app items (amber) is the memories, the byte-packer,  argmax and the output stage all under `apps/<app>/`.
+`ai_core_top` is the top-level wrapper. Everything in `rtl/` (green) is the shared core. The amber blocks are the per-app pieces - memories, the byte-packer glue, argmax and the output stage.
 
 ![ai_core_top instantiation](docs/diagrams/ai_core_top_instantiation.svg)
 
@@ -51,15 +48,9 @@ The `assembler/` folder is at the repo root. Layer shapes and quantized weights 
 
 ![Assembler toolchain](docs/diagrams/assembler_toolchain.svg)
 
-### End-to-end flow - MNIST
+### End-to-end flow
 
-Host sends a test image over UART, the board runs inference and the predicted digit shows up on the 7-segment display.
-
-![MNIST flow](docs/diagrams/mnist_full_flow.svg)
-
-### End-to-end flow, LunarLander
-
-The host streams observations to the board, the board sends the chosen action back over `uart_tx` and the host steps the environment and repeats.
+The host streams observations to the board, the board sends the chosen action back over `uart_tx` and the host steps the environment and repeats. That loop is the whole demo.
 
 ![LunarLander flow](docs/diagrams/lunarlander_full_flow.svg)
 
@@ -67,23 +58,23 @@ The host streams observations to the board, the board sends the chosen action ba
 
 ## Results
 
-| | MNIST | LunarLander |
-|---|---|---|
-| Network | 784 -> 128 -> 10 dense | 8 -> 128 -> 128 -> 4 dense  |
-| Quantization | INT8 per-tensor | INT8 per-channel weights |
-| Task metric | bit-exact vs golden (20/20 test images) | mean reward 261.2 over 20 ep (threshold 200 = solved) |
-| On-board | live, UART image input | live, UART obs in / action out |
+| | LunarLander |
+|---|---|
+| Network | 8 -> 128 -> 128 -> 4 dense (PPO policy) |
+| Quantization | INT8, per-channel weights |
+| Task metric | mean reward 261.2 over 20 ep (threshold 200 = solved) |
+| On-board | live, UART obs in / action out |
 
 ### Resource use (post-synthesis, `ai_core_top`, Artix-7)
 
-| Resource | MNIST | LunarLander | Available |
-|---|---|---|---|
-| Slice LUTs | 1574 (7.57%) | 733 (3.52%) | 20,800 |
-| Slice registers (FF) | 1193 (2.87%) | 1171 (2.81%) | 41,600 |
-| Block RAM (36k tiles) | 32.5 (65%) | 8.5 (17%) | 50 |
-| DSP48E1 | 16 (17.78%) | 24 (26.67%) | 90 |
-| Clock | 100 MHz | 100 MHz | |
-| Setup slack (WNS) | +0.035 ns | +0.253 ns | |
+| Resource | Used | Available |
+|---|---|---|
+| Slice LUTs | 733 (3.52%) | 20,800 |
+| Slice registers (FF) | 1171 (2.81%) | 41,600 |
+| Block RAM (36k tiles) | 8.5 (17%) | 50 |
+| DSP48E1 | 24 (26.67%) | 90 |
+| Clock | 100 MHz | |
+| Setup slack (WNS) | +0.253 ns | |
 
 ---
 
@@ -116,7 +107,7 @@ Registers are `R0` through `R7`. Labels for `LOOP` targets get resolved in a two
 
 ```
 ai-core/
-├── rtl/                     # shared core identical across apps
+├── rtl/                     # shared core
 │   ├── cpu/                 # fetch, decode, execute, regfile
 │   ├── pe/                  # INT8 processing element (DSP slice)
 │   ├── systolic_array/      # 4x4 weight-stationary array
@@ -127,26 +118,17 @@ ai-core/
 │   ├── accum_bank/          # INT32 accumulators
 │   ├── requant/             # fixed-point ReLU + rescale
 │   └── uart/                # uart_rx, uart_tx
-├── assembler/               # shared toolchain
+├── assembler/               # toolchain
 │   ├── assembler.py         # two-pass assembler -> .mem
 │   ├── build_program.py     # interactive: layer pairs -> asm -> .mem
 │   ├── convert_weights.py   # quantized .npy weights -> weights.mem
 │   └── layer_gen.py         # layer-shape -> assembly codegen
 ├── apps/
-│   ├── mnist/
-│   │   ├── top/             # ai_core_top.sv, W/A/R mem, mnist.asm, program.mem
-│   │   ├── argmax/          # 10-way streamed argmax
-│   │   ├── seven_seg/
-│   │   ├── golden_model/    # train_quantize.py, golden.py, w*.npy, b*.npy, test data
-│   │   ├── mnist_img_host/  # send_image.py (host sender)
-│   │   ├── sim/             # cocotb testbench
-│   │   ├── constrs_1/       # XDC constraints
-│   │   └── build.tcl
 │   └── lunarlander/
-│       ├── top/             # ai_core_top.sv (3-layer, byte-packer), program.asm
-│       ├── argmax/          # 4-way Q16 dequant comparator
+│       ├── top/              # ai_core_top.sv (3-layer, byte-packer), program.asm
+│       ├── argmax/           # 4-way Q16 dequant comparator
 │       ├── seven_seg/
-│       ├── golden_model/    # train_quantize.py (PPO), golden.py, w*.npy, scales.json
+│       ├── golden_model/     # train_quantize.py (PPO), golden.py, w*.npy, scales.json
 │       ├── lunarlander_host/ # host_script.py (drives the board + render window)
 │       ├── sim/
 │       ├── constrs_1/
@@ -163,20 +145,8 @@ Setup is split across two folders: `~/ai_core` on WSL for cocotb / Verilator / P
 
 ### 1. Generate the memory files (WSL)
 
-Program first then weights.
+Program first then weights. Layer pairs carry a folded bias row, so 8+1 and 128+1.
 
-MNIST:
-```bash
-# program.mem - assemble the hand-written program
-python assembler/assembler.py apps/mnist/top/mnist.asm apps/mnist/top/program.mem
-
-# weights.mem - trained INT8 weights (.npy from golden_model) -> BRAM 
-python assembler/convert_weights.py 784,128;128,10 \
-    apps/mnist/golden_model/w1.npy apps/mnist/golden_model/w2.npy \
-    -o apps/mnist/top/weights.mem
-```
-
-LunarLander (layer pairs carry bias row, so 8+1 and 128+1):
 ```bash
 python assembler/assembler.py apps/lunarlander/top/program.asm apps/lunarlander/top/program.mem
 
@@ -185,34 +155,27 @@ python assembler/convert_weights.py 9,128;129,128;129,4 \
     -o apps/lunarlander/top/weights.mem
 ```
 
-If you don't want to hand-write the `.asm`, `python assembler/build_program.py` takes the layer `(in,out)` pairs and does the codegen + assembly in one go. The `.npy` weights come out of each app's `golden_model/train_quantize.py`.
+If you don't want to hand-write the `.asm`, `python assembler/build_program.py` takes the layer `(in,out)` pairs and does the codegen + assembly in one go. The `.npy` weights come out of `golden_model/train_quantize.py`.
 
 ### 2. Simulate (WSL)
 
 ```bash
-cd apps/mnist/sim && make          # MNIST
-cd apps/lunarlander/sim && make    # LunarLander
+cd apps/lunarlander/sim && make
 ```
 
 ### 3. Build the bitstream (Windows -> Vivado)
 
 ```powershell
-cd path/to/apps/mnist    # use the path on your device to apps/mnist/
+cd path/to/apps/lunarlander    # use the path on your device
 source build.tcl
-cd path/to/apps/mnist
-source build.tcl         # use the path on your device to apps/lunarlander
 ```
 
-Run these commands in the Vivado Tcl
+Run this from the Vivado Tcl shell.
 
 ### 4. Run it on hardware (Windows)
 
-Serial only works on the Windows side. Port and baud are hardcoded in the host scripts (`COM4`, 115200) so change those if it differ.
+Serial only works on the Windows side. Port and baud are hardcoded in `host_script.py` (`COM4`, 115200) so change those if yours differ.
 
 ```powershell
-# MNIST - send a test image over serial
-python apps/mnist/mnist_img_host/send_image.py
-
-# LunarLander - live loop with a render window
 python apps/lunarlander/lunarlander_host/host_script.py
 ```
